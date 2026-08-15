@@ -1,0 +1,164 @@
+
+  (() => {
+    const root=document.getElementById('mcu-ch4-bank');
+    const C=(topic,page,q,answer,options,summary)=>({type:'choice',topic,page,q,answer,options,summary});
+    const T=(topic,page,q,truth,why)=>({type:'tf',topic,page,q,answer:truth?0:1,options:[['正确',truth?'该说法与课件一致。'+why:'该说法不成立。'+why],['错误',truth?'选择错误会否定课件中的正确结论。'+why:'正确。'+why]],summary:why});
+    const D=(topic,page,q,code,answer,points)=>({type:'code',topic,page,q,code,answer,points});
+    const Q=[
+      C('中断概述',5,'中断技术最适合解决哪类问题？',1,[['让CPU永远重复查询外设状态','这会浪费CPU时间。'],['实时监测与控制，及时响应外部或片内事件','正确。'],['扩大程序存储器容量','中断不改变存储容量。'],['替代所有主程序','中断服务是主程序的补充。']],'中断的价值在于事件发生时主动请求CPU服务，提高实时性和效率。'),
+      C('中断源',6,'AT89S52共有多少个中断请求源？',2,[['2个','这是外部中断引脚数量，不是全部中断源。'],['5个','AT89S51常见的5源配置少了T2。'],['6个','正确。'],['8个','本章机型不是8源。']],'6个中断源包括INT0、INT1、T0、T1、串口和T2。'),
+      C('中断源',8,'外部中断0的请求标志位是？',0,[['IE0','正确。'],['IE1','这是外部中断1标志。'],['TF0','这是T0溢出标志。'],['TI','这是串口发送标志。']],'INT0对应IE0，INT1对应IE1。'),
+      C('中断源',8,'定时器2的两个请求标志是？',3,[['TF0和TF1','属于T0/T1。'],['TI和RI','属于串口。'],['IE0和IE1','属于外部中断。'],['TF2和EXF2','正确，共用一个中断矢量。']],'T2溢出与捕捉/重装请求都通过T2中断入口处理。'),
+      C('中断标志',9,'TCON寄存器的字节地址和寻址属性是？',1,[['98H、不可位寻址','98H是SCON且TCON可位寻址。'],['88H、可位寻址','正确。'],['A8H、可位寻址','A8H是IE。'],['B8H、不可位寻址','B8H是IP且可位寻址。']],'TCON=88H，可位寻址，含TF1、TF0、IE1、IE0、IT1、IT0等。'),
+      C('中断标志',10,'T1计数溢出时，硬件会怎样处理TF1？',2,[['保持0并等待软件置1','方向相反。'],['直接清0且不申请中断','溢出会请求中断。'],['自动置1申请中断，响应时硬件自动清0','正确；软件也可清0。'],['把TF0置1','TF0属于T0。']],'TF1由溢出置1，CPU响应后自动清零。'),
+      C('中断触发',10,'IT0=0表示外部中断0采用？',0,[['电平触发，低电平有效','正确。'],['跳沿触发，低到高有效','IT0=1才是跳沿触发，且关注负跳变。'],['高电平触发','本章外部中断有效电平为低。'],['软件触发','IT0选择硬件引脚触发方式。']],'IT0/IT1为0电平触发，为1跳沿触发。'),
+      C('中断触发',11,'IT1=1时，外部中断1主要锁存什么事件？',3,[['持续高电平','那不是跳沿触发。'],['正跳变','8051外部中断跳沿指负跳变。'],['任意电平变化','只识别规定的负跳变。'],['负跳变','正确。']],'跳沿触发方式连续采样到高后低即可置位请求。'),
+      C('中断标志',12,'串口发送完成后，哪个标志由硬件置1？',1,[['RI','RI表示接收完成。'],['TI','正确。'],['TF2','属于T2。'],['IE0','属于外部中断0。']],'TI和RI都需在中断服务程序中由软件清零。'),
+      C('中断标志',12,'串口接收完一帧数据后，哪个标志置1？',0,[['RI','正确。'],['TI','TI是发送完成标志。'],['TF1','属于定时器1。'],['EXF2','属于T2捕捉/重装。']],'接收中断标志RI必须软件清零。'),
+      C('中断标志',13,'T2CON寄存器的字节地址是？',2,[['88H','这是TCON。'],['98H','这是SCON。'],['C8H','正确。'],['D0H','这是PSW。']],'T2CON=C8H，最高两位为TF2和EXF2。'),
+      C('中断标志',13,'当RCLK或TCLK为1时，TF2有什么特殊行为？',3,[['仍然每次溢出都置1','课件明确排除这种情况。'],['会自动清零','不是。'],['改为置位EXF2','两者触发条件不同。'],['不因溢出置位','正确。']],'串行波特率相关的RCLK/TCLK置1时，TF2不置位。'),
+      C('中断标志',14,'EXF2通常由什么事件置位？',1,[['T0溢出','属于TF0。'],['T2EX负跳变引起捕捉或重新装载且EXEN2=1','正确。'],['串口发送完成','属于TI。'],['RST高电平','这是复位。']],'EXF2与T2EX、EXEN2及T2工作方式相关。'),
+      C('中断允许',15,'中断允许寄存器IE的字节地址是？',0,[['A8H','正确，可位寻址。'],['88H','这是TCON。'],['B8H','这是IP。'],['C8H','这是T2CON。']],'IE控制总中断和各个中断源的开关。'),
+      C('中断允许',16,'EA=0时，AT89S52的中断状态是？',2,[['只禁止外部中断','EA是总开关。'],['只允许高优先级中断','EA=0不区分优先级。'],['所有中断请求被屏蔽','正确。'],['所有中断自动置高优先级','与EA无关。']],'EA是总中断允许位，必须为1才可能响应任一中断。'),
+      C('中断允许',16,'ET2=1表示？',1,[['禁止T2中断','0才表示禁止。'],['允许T2溢出中断','正确。'],['允许外部中断1','由EX1控制。'],['允许串口中断','由ES控制。']],'每个源还必须同时满足EA=1。'),
+      C('中断允许',17,'ES位控制哪一种中断？',3,[['T0','由ET0控制。'],['外部中断1','由EX1控制。'],['T2','由ET2控制。'],['串行口','正确。']],'ES=1允许串口发送或接收中断。'),
+      C('中断允许',18,'允许外部中断0，至少需要把哪两个位设1？',0,[['EA和EX0','正确，总开关加源开关。'],['EA和ET0','ET0是定时器0。'],['EX1和PX0','PX0只设置优先级。'],['IT0和PS','IT0选触发，PS是串口优先级。']],'EA是必要条件，EX0决定INT0源是否开放。'),
+      C('中断允许',18,'AT89S52复位后IE的内容通常是？',2,[['FFH','复位不会开放所有中断。'],['80H','EA也被清0。'],['00H','正确，所有中断禁止。'],['01H','不是。']],'复位后需软件重新初始化IE。'),
+      C('中断允许',20,'MOV IE，#8AH的效果是？',1,[['只允许串口中断','8AH不置ES。'],['允许T0、T1中断并打开EA，其他源禁止','正确。'],['允许T2和外部中断0','对应位不匹配。'],['关闭所有中断','EA=1。']],'8AH=10001010B，对应EA、ET1、ET0为1。'),
+      C('优先级',22,'IP寄存器的字节地址是？',3,[['A8H','这是IE。'],['88H','这是TCON。'],['98H','这是SCON。'],['B8H','正确，可位寻址。']],'IP每一位对应一个中断源优先级。'),
+      C('优先级',24,'IP中某源优先级控制位为1表示？',0,[['高优先级','正确。'],['低优先级','0才是低优先级。'],['禁止中断','禁止由IE控制。'],['清除请求标志','IP不清标志。']],'IP=0时所有源默认为低优先级。'),
+      C('优先级',22,'下列哪种嵌套关系允许发生？',2,[['低优先级中断打断高优先级中断','高优先级不能被低优先级打断。'],['同级中断互相打断','同级不互相打断。'],['高优先级中断打断低优先级中断','正确。'],['任何中断都能打断任何中断','不符合两级优先级规则。']],'两级嵌套的核心是高优先级可打断低优先级。'),
+      C('优先级',25,'同一优先级同时有多个中断请求时，最终由什么决定先响应？',1,[['IP中位值大小','同级时IP相同。'],['内部查询顺序','正确，形成辅助优先级。'],['向量地址数值越大越优先','不是简单按地址大小。'],['外设名称字母顺序','无此规则。']],'同级查询顺序中通常外部中断0优先级最高。'),
+      C('优先级',26,'在同级查询顺序中，优先级最高的通常是？',0,[['外部中断0','正确。'],['串口中断','低于前面的外部中断和定时器。'],['T1溢出','不是最高。'],['T2中断','通常最低。']],'课件强调INT0最高、T2最低。'),
+      C('优先级',26,'同级查询顺序中，优先级最低的通常是？',3,[['外部中断0','它最高。'],['T0溢出','不是最低。'],['串口中断','仍高于T2。'],['T2溢出或EXF2','正确。']],'T2两类请求共用一个矢量且在同级顺序中靠后。'),
+      C('响应条件',27,'下列哪一项不是中断响应的必要条件？',2,[['EA=1','必要。'],['对应请求标志为1','必要。'],['当前A的值为0','A值与能否响应无关。'],['对应中断允许位为1','必要。']],'还需没有同级或更高级中断正在服务。'),
+      C('响应条件',27,'某个源的请求标志为1但EA=0时，CPU会？',1,[['立即响应','EA关闭总中断。'],['暂不响应，直到EA重新置1且请求仍有效','正确。'],['自动清除请求标志','不会因为屏蔽就自动清除。'],['转为低优先级执行','不是优先级转换。']],'请求可以保持，是否响应由允许条件共同决定。'),
+      C('响应过程',28,'AT89S52响应中断时，硬件等效执行的调用指令是？',0,[['LCALL addr16','正确，保存断点并跳到矢量。'],['RET','用于返回。'],['MOVC','用于查表。'],['DJNZ','用于循环。']],'硬件先保护PC断点，再把中断入口装入PC。'),
+      C('响应过程',28,'外部中断1的固定中断矢量地址是？',2,[['0003H','这是INT0。'],['000BH','这是T0。'],['0013H','正确。'],['0023H','这是串口。']],'外部中断1入口为0013H。'),
+      C('响应过程',28,'串行口中断的固定矢量地址是？',1,[['001BH','这是T1。'],['0023H','正确。'],['002BH','这是T2。'],['0003H','这是INT0。']],'串口TI/RI共用0023H入口。'),
+      C('响应过程',29,'为什么中断矢量处通常只放跳转指令？',2,[['CPU禁止在矢量处执行指令','矢量处可以执行。'],['矢量地址不能写程序','可以写入跳转。'],['相邻矢量间隔仅8字节，完整服务程序往往放不下','正确。'],['跳转指令会自动清除所有标志','清标志需按源分别处理。']],'矢量区作为跳板，把服务程序放到更宽裕的地址。'),
+      C('响应过程',30,'若CPU正在执行一条多机器周期指令，中断通常何时响应？',0,[['当前指令全部执行完毕后','正确，保证指令完整性。'],['当前指令第一个机器周期结束就响应','会破坏指令原子性。'],['立即打断当前机器周期','8051不是这样响应。'],['只有复位后才响应','错误。']],'中断查询结果需等当前指令最后一个机器周期完成。'),
+      C('响应过程',30,'执行RETI或访问IE/IP指令时，新的中断响应会？',2,[['立即响应','需额外完成一条指令。'],['永久丢失','请求可能继续存在。'],['被延迟，待该指令后再执行一条指令','正确。'],['自动转为低优先级','不会。']],'这是AT89S52中断响应封锁条件之一。'),
+      C('响应时间',31,'单一中断系统中，外部中断最短响应时间是？',1,[['2个机器周期','LCALL就需2周期，还包括查询周期。'],['3个机器周期','正确。'],['8个机器周期','这是最长情况。'],['12个机器周期','混淆了时钟周期。']],'1个查询周期加2个硬件LCALL周期。'),
+      C('响应时间',32,'单一中断系统中，外部中断最长响应时间是？',3,[['3个机器周期','这是最短。'],['4个机器周期','少算了封锁条件。'],['6个机器周期','仍少算。'],['8个机器周期','正确。']],'RETI/IE/IP最长2周期+下一条最长4周期+LCALL 2周期。'),
+      C('触发方式',33,'电平触发方式下，返回中断服务程序前外部请求输入应？',0,[['变为无效高电平','否则可能再次响应。'],['始终保持低电平','低电平会再次触发。'],['变为负脉冲','这是跳沿场景。'],['由软件写入IE1','IE1不是外部引脚电平。']],'电平触发适合服务程序能清除请求源的系统。'),
+      C('触发方式',34,'跳沿触发方式能锁存哪种外部事件？',2,[['持续低电平','那是电平触发。'],['正跳变','本章使用负跳变。'],['高到低的负跳变','正确。'],['任意高频噪声','需要满足采样条件。']],'连续采样一个周期高、下一个周期低时置位。'),
+      C('触发方式',34,'外部负脉冲至少保持多长时间才能可靠被采样？',1,[['1个时钟周期','采样需跨越两个机器周期采样点。'],['12个时钟周期','正确，约1个机器周期。'],['2个机器周期以上才行','课件给出的最小值是12时钟。'],['任意宽度','过窄可能漏采。']],'跳沿输入脉宽需满足采样要求。'),
+      C('请求撤销',35,'T0/T1中断请求标志的撤销方式是？',3,[['只能软件清零','硬件响应会自动清。'],['只能复位清零','软件也可清。'],['保持置1到下次溢出','错误。'],['响应后硬件自动清零，也可软件清零','正确。']],'TF0/TF1与串口、T2标志的清除规则不同。'),
+      C('请求撤销',35,'跳沿方式外部中断响应后，请求信号如何撤销？',0,[['标志由硬件清零，负跳变本身也已消失','正确。'],['必须把引脚强制拉高','这是电平触发撤销的重点。'],['只能清IE0不能清外部信号','跳沿信号自然结束。'],['必须清TF0','标志不同。']],'跳沿请求一般硬件即可完成撤销。'),
+      C('请求撤销',36,'电平方式外部中断除了清标志，还必须处理什么？',2,[['重新设置IP','优先级与信号撤销无关。'],['重新启动T0','不是。'],['让外部请求输入从低电平恢复为高电平','正确。'],['把EA清0永久关闭中断','不是解决请求源的方法。']],'否则IRET后低电平仍在，会再次申请。'),
+      C('请求撤销',38,'串行口中断请求通常如何撤销？',1,[['硬件响应自动清TI、RI','课件明确说必须软件清。'],['在服务程序中查询并软件清TI或RI','正确。'],['只清EA即可','EA只是总允许。'],['清TF2','与串口无关。']],'CPU无法仅靠硬件判断是发送还是接收，因此需软件处理。'),
+      C('请求撤销',39,'T2中断服务程序为什么要同时查询TF2和EXF2？',3,[['两者完全相同','它们对应不同来源。'],['T2有两个不同矢量','实际共用一个矢量。'],['硬件已经帮软件分流','仍需软件判别。'],['两种请求共用一个矢量，需软件分辨来源','正确。']],'处理完对应事件后还要软件清零标志。'),
+      C('服务程序',40,'设计中断服务子程序前，初始化通常不包括？',2,[['设置IE','必要。'],['设置IP','用于优先级。'],['修改程序存储器容量','与中断初始化无关。'],['设置外部中断触发方式','外部源需要。']],'前三项初始化，再编写服务程序处理逻辑。'),
+      C('服务程序',41,'SETB EA、SETB EX0、SETB PX0、SETB IT0组合表示？',0,[['开放INT0，设为高优先级，采用跳沿触发','正确。'],['开放T0低优先级电平触发','对应位不匹配。'],['只开放串口','没有设置ES。'],['关闭所有中断','EA和EX0均为1。']],'这是课件例4-3的典型初始化。'),
+      C('服务程序',46,'中断服务程序的现场保护应放在？',1,[['中断处理之后','太晚，现场可能已被破坏。'],['中断处理之前','正确。'],['RETI之后','RETI是最后返回。'],['主程序结束之后','无关。']],'现场保护的目的是不破坏主程序现场。'),
+      C('服务程序',48,'中断服务子程序最后一条指令必须是？',3,[['RET','普通子程序返回。'],['JMP','不能恢复断点和中断状态。'],['NOP','不会返回主程序。'],['RETI','正确。']],'RETI恢复断点并清除相应优先级激活状态。'),
+      C('扩展中断',51,'查询法扩展多外部中断源时，INT1通常与哪些信号相连？',0,[['多个OC门公共输出，同时把各请求线接到P1供查询','正确。'],['只接一个外部引脚，不需要查询','失去扩展意义。'],['只接P2，不使用外部中断','不能自动请求。'],['接PSEN和ALE','这些是存储器控制信号。']],'INT1负责发起总请求，P1负责判别具体来源。'),
+      C('扩展中断',53,'查询法中，CPU如何确定IR1～IR4中是哪一路请求？',2,[['读取IE寄存器','IE只表示允许状态。'],['读取IP寄存器','IP只表示优先级。'],['查询P1.0～P1.3引脚电平','正确。'],['查询PC值','PC是程序地址。']],'题设通常假定同一时刻只有一个请求源有效。'),
+      C('扩展中断',56,'74LS148在扩展外部中断时的主要作用是？',1,[['产生系统时钟','不是时钟芯片。'],['对多个低有效请求进行优先级编码','正确。'],['把中断转换成模拟量','不是。'],['代替IE寄存器','IE仍由单片机控制。']],'硬件编码减少软件逐一查询带来的时间差。'),
+      C('扩展中断',59,'74LS148的编码输出A2～A0接到AT89S52的哪些引脚？',3,[['P0.0～P0.2','课件接到P1。'],['P2.0～P2.2','不是。'],['P3.0～P3.2','会与串口/INT0复用。'],['P1.1～P1.3','正确。']],'编码输入由P1.3～P1.1读取。'),
+      C('扩展中断',62,'74LS148的8个输入中，优先级最高的是？',0,[['输入7（IR0*）','正确。'],['输入0（IR7*）','输入0最低。'],['输入4','不是最高。'],['所有输入优先级相同','优先权编码器正是为区分优先级。']],'多个低有效请求同时出现时只输出最高优先级编码。'),
+      C('扩展中断',63,'12MHz系统时钟下，扩展编码中断的低电平请求至少应保持多久？',2,[['3μs','只接近最短响应时间，不够读编码。'],['8μs','仍不足。'],['大于15μs','正确，读取编码的7机器周期约7μs，加响应裕量。'],['100μs以上','不是本章给出的最低要求。']],'扩展请求需保持到CPU执行引导程序取走编码。'),
+      C('扩展中断',64,'使用优先权编码器扩展的IR0*～IR7*中断，主要局限是？',1,[['不能设置任何优先级','74LS148本身提供优先级。'],['扩展源之间不能实现中断嵌套','正确。'],['只能扩展2个源','可扩展8个。'],['必须使用串口中断','通常接一个外部中断入口。']],'编码器硬件排队简单快速，但正在服务时不再嵌套其他扩展源。'),
+
+      C('中断矢量',28,'外部中断0的固定入口地址是？',0,[['0003H','正确。'],['000BH','这是T0。'],['0013H','这是INT1。'],['0023H','这是串口。']],'INT0中断矢量为0003H。'),
+      C('中断矢量',28,'定时器0溢出中断的固定入口地址是？',1,[['0003H','这是INT0。'],['000BH','正确。'],['001BH','这是T1。'],['002BH','这是T2。']],'T0中断矢量为000BH。'),
+      C('中断矢量',28,'定时器1溢出中断的固定入口地址是？',2,[['000BH','这是T0。'],['0013H','这是INT1。'],['001BH','正确。'],['0023H','这是串口。']],'T1中断矢量为001BH。'),
+      C('中断矢量',28,'定时器2中断的固定入口地址是？',3,[['0013H','这是INT1。'],['001BH','这是T1。'],['0023H','这是串口。'],['002BH','正确。']],'TF2和EXF2共用002BH入口。'),
+      C('优先级',23,'IP中的PT0位控制哪个中断源的优先级？',1,[['外部中断0','由PX0控制。'],['定时器0','正确。'],['定时器1','由PT1控制。'],['串口','由PS控制。']],'IP命名中P表示优先级，T0表示定时器0。'),
+
+      T('中断概述',6,'采用中断技术可以减少CPU反复查询外设状态所浪费的时间。',true,'事件发生后由中断源主动请求服务，可提高效率和实时性。'),
+      T('中断源',6,'AT89S52有6个中断源和2个中断优先级。',true,'可实现两级中断嵌套。'),
+      T('中断标志',9,'6个中断源的请求标志分别分布在TCON、SCON和T2CON中。',true,'不同功能部件使用各自控制寄存器锁存请求。'),
+      T('中断标志',12,'CPU响应串口中断后，TI和RI都会由硬件自动清零。',false,'TI和RI必须由软件在服务程序中清零。'),
+      T('中断标志',13,'当RCLK或TCLK为1时，T2溢出仍会正常置位TF2。',false,'课件明确指出此时不置位TF2。'),
+      T('中断允许',16,'EA=0会屏蔽所有中断请求，不论其优先级高低。',true,'EA是总中断开关。'),
+      T('中断允许',18,'只要SETB EX0，就一定能响应外部中断0。',false,'还必须EA=1，并满足请求标志、优先级等响应条件。'),
+      T('中断允许',18,'AT89S52复位后IE=00H，所有中断默认禁止。',true,'初始化程序必须重新设置IE。'),
+      T('优先级',22,'低优先级中断可以打断正在执行的高优先级中断。',false,'只允许高优先级打断低优先级。'),
+      T('优先级',22,'正在执行的中断不会被同级中断源打断。',true,'同级中断不嵌套。'),
+      T('优先级',26,'多个同级请求同时出现时，外部中断0的查询优先权最高。',true,'T2在同级查询顺序中最低。'),
+      T('响应过程',29,'各中断矢量入口之间通常相隔8个字节。',true,'因此入口处一般只放跳转指令。'),
+      T('响应过程',30,'CPU可以在一条指令执行到一半时立即响应中断。',false,'必须等待当前指令完整执行结束。'),
+      T('响应过程',30,'执行RETI或访问IE/IP后，还需再执行完一条指令才响应新中断。',true,'这是中断响应的封锁规则之一。'),
+      T('响应时间',32,'单一中断系统中，外部中断响应时间通常为3～8个机器周期。',true,'已有同级或更高级服务时则需另算。'),
+      T('触发方式',33,'电平触发方式返回前若INT0仍为低电平，可能再次产生中断。',true,'必须让外部请求输入恢复为高电平。'),
+      T('触发方式',34,'跳沿触发方式可以可靠捕获任意窄的负脉冲。',false,'负脉冲至少应保持12个时钟周期。'),
+      T('触发方式',34,'跳沿请求一旦被锁存，即使暂时不能响应，请求标志也不会立即丢失。',true,'它会保持到CPU响应并清零。'),
+      T('请求撤销',35,'T0和T1中断响应后，TF0和TF1由硬件自动清零。',true,'也可以由软件主动清零。'),
+      T('请求撤销',38,'串行口中断服务程序必须由软件判别并清除TI或RI。',true,'发送和接收共用一个中断矢量。'),
+      T('请求撤销',39,'TF2和EXF2在中断响应后都会由硬件自动清零。',false,'两者必须由软件清零。'),
+      T('服务程序',46,'现场保护应放在中断处理前，现场恢复应放在中断处理后。',true,'这样才不会破坏主程序寄存器和状态。'),
+      T('服务程序',50,'现场恢复的POP顺序应与PUSH顺序相同。',false,'堆栈后进先出，恢复顺序必须相反。'),
+      T('服务程序',48,'中断服务子程序可以用普通RET代替RETI，效果完全相同。',false,'RETI还会清除内部中断优先级激活状态。'),
+      T('服务程序',47,'通过清EA可以暂时禁止中断嵌套，保护关键现场操作。',true,'临界操作结束后可重新置EA。'),
+      T('服务程序',42,'较长的中断服务程序通常直接从固定矢量地址连续写下去。',false,'相邻矢量仅隔8字节，通常先跳到远处的服务程序。'),
+      T('扩展中断',55,'查询法扩展电路简单，但中断源越多，最低优先级源的查询时间可能越长。',true,'这正是硬件优先权编码器的优势所在。'),
+      T('扩展中断',59,'74LS148的中断请求输入和总请求输出均按课件采用低电平有效。',true,'任一有效输入可使编码器总请求端产生低电平。'),
+      T('扩展中断',62,'74LS148扩展的8个外部中断源之间可以自由实现多级中断嵌套。',false,'课件指出这组扩展源之间无法实现中断嵌套。'),
+      T('扩展中断',64,'频繁中断、子程序调用和大量现场保护都可能造成片内堆栈溢出。',true,'AT89S52堆栈只能位于容量有限的片内RAM。'),
+
+      D('代码与综合',19,'分析IE的字节设置。它允许哪些中断？','MOV IE，#8AH','8AH=10001010B，对应EA=1、ET1=1、ET0=1，其余源允许位为0。因此总中断打开，只允许定时器T1和T0中断。','关键点：EA是总开关；ET1/ET0分别控制T1/T0；只置源允许位而不置EA仍不能响应。'),
+      D('代码与综合',26,'分析IP初始化。哪些中断被设为高优先级？','MOV IP，#05H','05H=00000101B，对应PX1=1、PX0=1，因此外部中断1和外部中断0为高优先级；其他源为低优先级。','关键点：IP位1表示高优先级；PX0和PX1分别对应INT0、INT1。'),
+      D('代码与综合',41,'说明这组初始化语句最终建立了什么中断配置。','SETB EA\nSETB EX0\nSETB PX0\nSETB IT0','打开总中断，允许外部中断0，将INT0设为高优先级，并选择跳沿触发方式。实际使用时还应保证中断服务程序在入口地址处有跳转，并按任务清除请求源。','关键点：EA+EX0才真正开放INT0；PX0控制优先级；IT0=1表示负跳沿触发。'),
+      D('代码与综合',14,'T2中断服务程序为什么需要分别查询两个标志？请给出处理框架。','JNB TF2，CHECK_EXF2\n; 处理T2溢出\nCLR TF2\nSJMP T2_DONE\nCHECK_EXF2：JNB EXF2，T2_DONE\n; 处理T2捕捉/重装\nCLR EXF2\nT2_DONE：RETI','TF2和EXF2共用同一个中断矢量，进入服务程序后必须先判别哪一个标志置位，再执行对应处理并由软件清零，最后RETI返回。','关键点：T2中断不是两个矢量；两个标志都要查、都要清；不能只清其中一个。'),
+      D('代码与综合',50,'判断下面的现场保护/恢复顺序是否正确，并说明原因。','PUSH PSW\nPUSH Acc\n; 处理\nPOP PSW\nPOP Acc\nRETI','顺序错误。压栈顺序是先PSW、后Acc，恢复必须后进先出，即先POP Acc、再POP PSW，否则两个寄存器会互换数据，破坏主程序现场。','关键点：现场恢复顺序必须与保护顺序相反；RETI必须是最后返回指令。'),
+      D('代码与综合',37,'电平触发外部中断的请求撤销为什么需要额外操作？这组三条指令起什么作用？','ORL P1，#01H\nANL P1，#0FEH\nORL P1，#01H','电平触发时，IE0被清零并不等于外部请求源已消失。如果外部锁存器仍使INT0保持低电平，RETI后会再次申请。三条指令让P1.0产生一个负脉冲，通过外部D触发器的SD端把请求锁存器置为无效高电平，从而撤销请求。','关键点：清标志与清外部低电平是两件事；负脉冲用于复位外部请求锁存器。'),
+      D('代码与综合',53,'查询法扩展4个外部中断源时，为什么先判断P1.0再判断P1.1等？','JNB P1.0，IR1\nJNB P1.1，IR2\nJNB P1.2，IR3\nJNB P1.3，IR4','各路请求通过OC门汇合到INT1触发总中断，再由P1.0～P1.3查询具体来源。查询顺序决定同级扩展源的响应优先级，因此把P1.0放在前面就意味着IR1优先级高于后续通道。','关键点：INT1只告诉“有请求”；P1查询才能确定是哪一路；查询顺序就是软件优先级。'),
+      D('代码与综合',60,'若74LS148输出编码001，如何解释并将程序转到对应服务分支？','MOV A，P1\nANL A，#0EH\nCJNE A，#02H，NEXT\nLJMP IR1_SERVICE\nNEXT：…','编码器输出接P1.3～P1.1，读取后右移一位或用掩码换算成A2～A0编码。001表示输入端IR1*（按课件示例）具有最高优先级，应跳到IR1_SERVICE。','关键点：先读取编码，再根据编码分支；多个请求同时来时74LS148只输出最高优先级编码。'),
+      D('响应时间',31,'12MHz晶振时，单一中断的最短和最长响应时间分别是多少？','Tosc=1/12MHz=0.0833μs\nTmachine=12Tosc=1μs','最短响应3个机器周期，即约3μs；最长响应8个机器周期，即约8μs。最长情况包含访问RETI/IE/IP的延迟、再执行一条最长4周期指令以及硬件LCALL的2周期。','关键点：3～8是单一中断、未被同级或高级中断占用时的范围；已有中断服务在执行时，响应时间还要加服务程序时间。'),
+      D('触发方式',34,'为什么下面的跳沿触发请求可能丢失？应如何改进？','INT0*低电平脉冲宽度：4个时钟周期\nIT0=1','跳沿触发需要连续采样到一个机器周期高、下一个机器周期低，课件要求负脉冲至少保持12个时钟周期。只有4个时钟周期可能在采样点之间消失，CPU无法锁存IE0。应延长脉冲或使用外部锁存器保持请求。','关键点：跳沿触发不是任意短脉冲都能捕获；硬件采样周期决定最小脉宽。')
+    ];
+
+    const storageKey='mcu-chapter-4-progress-v1';
+    const states=Q.map(()=>({selected:null,submitted:false,correct:false,mastered:null,response:''}));
+    const mistakes=Q.map(()=>({attempts:0,lastSelected:null,mastered:false}));
+    let wrongBookOpen=false;
+    let order=Q.map((_,i)=>i), cursor=0;
+    const $=s=>root.querySelector(s);
+    const el={total:$('#c4-total'),pos:$('#c4-pos'),done:$('#c4-done'),score:$('#c4-score'),type:$('#c4-type'),topic:$('#c4-topic'),kind:$('#c4-kind'),topicLabel:$('#c4-topic-label'),page:$('#c4-page'),progress:$('#c4-progress'),question:$('#c4-question'),code:$('#c4-code'),options:$('#c4-options'),responseWrap:$('#c4-response-wrap'),response:$('#c4-response'),summary:$('#c4-summary'),prev:$('#c4-prev'),submit:$('#c4-submit'),master:$('#c4-master'),review:$('#c4-review'),next:$('#c4-next'),shuffle:$('#c4-shuffle'),retry:$('#c4-retry'),ask:$('#c4-ask'),askBtn:$('#c4-ask-btn'),feedback:$('#c4-feedback'),wrongCount:$('#c4-wrong-count'),wrongBookButton:$('#c4-wrong-book'),wrongList:$('#c4-wrong-list'),clearButton:$('#c4-clear'),savedNote:$('#c4-saved-note')};
+    const labels={choice:'选择题',tf:'判断题',code:'代码/综合题'};
+    [...new Set(Q.map(x=>x.topic))].forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;el.topic.appendChild(o);});
+    const current=()=>order[cursor];
+    function saveProgress(){try{localStorage.setItem(storageKey,JSON.stringify({order,cursor,states,mistakes,savedAt:new Date().toISOString()}));el.savedNote.textContent='已自动保存 · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}catch(error){el.savedNote.textContent='当前浏览器不允许保存进度';}}
+    function loadProgress(){try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(!saved)return;if(Array.isArray(saved.order))order=saved.order;if(Number.isInteger(saved.cursor))cursor=Math.min(Math.max(saved.cursor,0),order.length-1);if(Array.isArray(saved.states))saved.states.forEach((s,i)=>{if(states[i]&&s)states[i]={...states[i],...s};});if(Array.isArray(saved.mistakes))saved.mistakes.forEach((m,i)=>{if(mistakes[i]&&m)mistakes[i]={...mistakes[i],...m};});if(saved.savedAt)el.savedNote.textContent='已恢复上次进度 · '+new Date(saved.savedAt).toLocaleString();}catch(error){el.savedNote.textContent='已有进度无法读取';}}
+    function renderWrongBook(){const entries=mistakes.map((mistake,index)=>({mistake,index})).filter(x=>x.mistake.attempts>0);el.wrongCount.textContent=String(entries.length);el.wrongBookButton.textContent=entries.length?'查看错题本 ('+entries.length+')':'查看错题本';el.wrongList.hidden=!wrongBookOpen;el.wrongList.replaceChildren();if(!entries.length){const empty=document.createElement('div');empty.className='text-small text-muted';empty.textContent='还没有错题记录。提交错误答案后，这里会自动归档。';el.wrongList.appendChild(empty);return;}entries.forEach(({mistake,index})=>{const q=Q[index],card=document.createElement('article');card.className='wrong-item';card.innerHTML='<strong>第 '+(index+1)+' 题 · '+q.topic+'</strong><p>'+q.q+'</p><div class="wrong-meta">作答 '+(mistake.lastSelected===null?'未选择':String.fromCharCode(65+mistake.lastSelected))+' · 正确答案 '+(q.type==='tf'?(q.answer===0?'正确':'错误'):String.fromCharCode(65+q.answer))+' · '+(mistake.mastered?'已掌握':'待重练')+'</div>';el.wrongList.appendChild(card);});}
+
+    const letter=i=>String.fromCharCode(65+i);
+    function rebuild(){
+      const type=el.type.value, topic=el.topic.value;
+      order=Q.map((q,i)=>({q,i})).filter(x=>(type==='all'||x.q.type===type)&&(topic==='all'||x.q.topic===topic)).map(x=>x.i);
+      cursor=0; render();
+    }
+    function render(){
+      if(!order.length){el.question.textContent='当前筛选条件下没有题目。';return;}
+      const i=current(),q=Q[i],s=states[i];
+      const done=states.filter(x=>x.submitted||x.mastered!==null).length;renderWrongBook();
+      const score=states.filter(x=>x.correct||x.mastered===true).length;
+      el.total.textContent=String(order.length);el.pos.textContent=`${cursor+1} / ${order.length}`;el.done.textContent=String(done);el.score.textContent=String(score);
+      el.kind.textContent=labels[q.type];el.topicLabel.textContent=q.topic;el.page.textContent=`课件第 ${q.page} 页`;el.progress.style.width=`${(cursor+1)/order.length*100}%`;el.question.textContent=q.q;
+      el.code.hidden=q.type!=='code';el.code.querySelector('code').textContent=q.code||'';el.options.replaceChildren();el.responseWrap.hidden=q.type!=='code';el.response.value=s.response||'';
+      if(q.type!=='code'){
+        q.options.forEach((op,n)=>{const b=document.createElement('button');b.type='button';b.className='btn option';b.setAttribute('aria-pressed',String(s.selected===n));if(s.selected===n)b.classList.add('is-selected');if(s.submitted&&n===q.answer)b.classList.add('correct');if(s.submitted&&s.selected===n&&n!==q.answer)b.classList.add('wrong');b.innerHTML=`<span class="option-key">${q.type==='tf'?['√','×'][n]:letter(n)}</span><span><span>${op[0]}</span>${s.submitted?`<div class="option-note">${n===q.answer?'正确项：':'选项解析：'}${op[1]}</div>`:''}</span>`;b.disabled=s.submitted;b.addEventListener('click',()=>{s.selected=n;saveProgress();render();});el.options.appendChild(b);});
+      }
+      if(q.type==='code'&&s.submitted){el.summary.hidden=false;el.summary.dataset.state=s.mastered===false?'wrong':'correct';el.summary.innerHTML=`<strong>参考答案</strong><div class="answer-box">${q.answer}\n\n${q.points}</div>`;}
+      else if(q.type!=='code'&&s.submitted){el.summary.hidden=false;el.summary.dataset.state=s.correct?'correct':'wrong';el.summary.innerHTML=`<strong>${s.correct?'回答正确':`回答错误，正确答案是 ${q.type==='tf'?(q.answer===0?'正确':'错误'):letter(q.answer)}`}</strong><div>${q.summary}</div>`;}
+      else{el.summary.hidden=true;el.summary.textContent='';}
+      el.prev.disabled=cursor===0;el.next.disabled=cursor===order.length-1;
+      el.submit.hidden=false;el.submit.disabled=q.type==='code'?s.submitted:(s.submitted||s.selected===null);el.submit.textContent=q.type==='code'?(s.submitted?'已显示答案':'显示参考答案'):(s.submitted?'已提交':'提交答案');
+      el.master.hidden=!(q.type==='code'&&s.submitted);el.review.hidden=!(q.type==='code'&&s.submitted);el.master.setAttribute('aria-pressed',String(s.mastered===true));el.review.setAttribute('aria-pressed',String(s.mastered===false));el.feedback.textContent='';
+      if(window.lucide)window.lucide.createIcons({attrs:{width:16,height:16}});
+    }
+    el.submit.addEventListener('click',()=>{const i=current(),q=Q[i],s=states[i];if(q.type==='code'){s.response=el.response.value;s.submitted=true;}else if(s.selected!==null&&!s.submitted){s.submitted=true;s.correct=s.selected===q.answer;if(!s.correct){mistakes[i].attempts++;mistakes[i].lastSelected=s.selected;mistakes[i].mastered=false;}else if(mistakes[i].attempts)mistakes[i].mastered=true;}saveProgress();render();});
+    el.response.addEventListener('input',()=>{states[current()].response=el.response.value;});
+    el.master.addEventListener('click',()=>{const s=states[current()];s.mastered=true;render();});
+    el.review.addEventListener('click',()=>{const s=states[current()];s.mastered=false;render();});
+    el.prev.addEventListener('click',()=>{if(cursor>0){cursor--;saveProgress();render();}});el.next.addEventListener('click',()=>{if(cursor<order.length-1){cursor++;saveProgress();render();}});
+    el.type.addEventListener('change',()=>{rebuild();saveProgress();});el.topic.addEventListener('change',()=>{rebuild();saveProgress();});el.wrongBookButton.addEventListener('click',()=>{wrongBookOpen=!wrongBookOpen;renderWrongBook();});el.clearButton.addEventListener('click',()=>{if(!window.confirm('清除本章的答题进度和错题记录？'))return;localStorage.removeItem(storageKey);location.reload();});
+    el.shuffle.addEventListener('click',()=>{for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}cursor=0;render();});
+    el.retry.addEventListener('click',()=>{const wrong=Q.map((q,i)=>({q,i,s:states[i]})).filter(x=>(x.q.type==='code'&&x.s.mastered===false)||(x.q.type!=='code'&&x.s.submitted&&!x.s.correct)).map(x=>x.i);if(!wrong.length){el.feedback.textContent='目前没有已记录的错题或待复习大题。';return;}wrong.forEach(i=>{states[i]={selected:null,submitted:false,correct:false,mastered:null,response:''};});order=wrong;cursor=0;saveProgress();render();});
+    el.askBtn.addEventListener('click',async()=>{const text=el.ask.value.trim();if(!text){el.feedback.textContent='请先输入问题。';return;}const q=Q[current()];if(!window.openai||typeof window.openai.sendFollowUpMessage!=='function'){el.feedback.textContent='当前环境不支持直接追问，可在对话框中发送该问题。';return;}el.askBtn.disabled=true;el.feedback.textContent='正在准备追问…';try{await window.openai.sendFollowUpMessage({title:'追问第四章题目',prompt:`请基于《第4章 AT89S52单片机的中断系统》课件回答。当前题目：${q.q}\n课件依据：第${q.page}页。\n我的追问：${text}\n请重点说明寄存器、引脚或硬件工作过程，并指出考试易错点。`});el.ask.value='';el.feedback.textContent='追问已发送。';}catch(e){el.feedback.textContent='发送失败，请稍后重试。';}finally{el.askBtn.disabled=false;}});
+    el.ask.addEventListener('keydown',e=>{if(e.key==='Enter')el.askBtn.click();});
+    loadProgress();render();
+  })();
+  

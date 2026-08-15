@@ -1,0 +1,435 @@
+
+    (() => {
+      const root = document.getElementById('mcu-ch1-quiz');
+      const questions = [
+        {
+          topic: '基础概念', page: 5,
+          q: '下列哪一项最准确地概括了“单片机”的基本含义？',
+          options: [
+            ['只把 CPU 集成在一块芯片上的通用处理器', '不准确。只有 CPU 更接近微处理器，单片机还集成存储器、I/O 和定时等部件。'],
+            ['把 CPU、存储器、I/O、定时器等集成在一片芯片上的微型计算机', '正确。课件强调这些核心功能部件被集成在一片半导体硅片上，并主要用于测量与控制。'],
+            ['专门用于存储程序的半导体器件', '不准确。这只描述了存储器的一种用途，没有体现计算与控制能力。'],
+            ['由多台计算机通过网络组成的控制系统', '不准确。这描述的是分布式系统，而不是单片机芯片本身。']
+          ], answer: 1,
+          summary: '单片机不是“缩小的 CPU”，而是一套高度集成、可独立承担测控任务的微型计算机系统。'
+        },
+        {
+          topic: '基础概念', page: 6,
+          q: '国际上通常用哪个名称强调单片机在嵌入式测控系统中的角色？',
+          options: [
+            ['MCU（MicroController Unit）', '正确。MCU 即微控制器，是国际上常用的名称；课件也提到 EMCU。'],
+            ['GPU（Graphics Processing Unit）', '错误。GPU 主要面向图形与大规模并行计算。'],
+            ['HDD（Hard Disk Drive）', '错误。HDD 是硬盘驱动器，不是控制器。'],
+            ['PLC（Programmable Logic Controller）', '错误。PLC 是工业可编程控制器，虽也用于控制，但不是单片机的国际通用名称。']
+          ], answer: 0,
+          summary: '“单片机”是国内习惯名称；MCU/EMCU 更突出它作为嵌入式控制核心的身份。'
+        },
+        {
+          topic: '分类', page: 7,
+          q: '通用型单片机与专用型单片机的主要区别是什么？',
+          options: [
+            ['通用型只能用于教学，专用型只能用于工业', '错误。分类依据不是教学或工业场景，而是资源与用途是否面向用户灵活开发。'],
+            ['通用型资源开放给用户组合开发，专用型针对特定产品用途优化', '正确。通用型便于配置外围电路和软件；专用型则围绕特定产品综合优化。'],
+            ['通用型没有程序存储器，专用型一定有', '错误。是否有程序存储器不是这两类的定义性区别。'],
+            ['通用型一定是 32 位，专用型一定是 8 位', '错误。位数与用途分类是两个不同维度。']
+          ], answer: 1,
+          summary: '“通用”强调可由用户灵活开发，“专用”强调围绕固定用途进行结构、可靠性和成本优化。'
+        },
+        {
+          topic: '发展历史', page: 10,
+          q: '课件把 1978—1983 年称为高性能单片机阶段，哪一事件最能代表这一阶段？',
+          options: [
+            ['F8 单片机出现，但仅含 CPU、少量 RAM 和并行口', '错误。这属于 1974—1976 年的初级阶段。'],
+            ['MCS-48 推出并促进单片机变革', '不完全正确。MCS-48 对应 1976—1978 年低性能阶段。'],
+            ['MCS-51 等机型出现，并加入串行口、多级中断和 16 位定时器等资源', '正确。这些功能提升使单片机性能与应用迈上新台阶。'],
+            ['32 位单片机完全取代 8 位单片机', '错误。课件明确指出 8 位单片机至今仍被广泛应用。']
+          ], answer: 2,
+          summary: '高性能阶段的关键不是只提高位数，而是片内资源、寻址能力、中断和通信功能的系统增强。'
+        },
+        {
+          topic: '特点', page: 13,
+          q: '单片机能够广泛应用于测控系统，最核心的一组原因是？',
+          options: [
+            ['体积小、成本低、功能较完整、可靠且易嵌入', '正确。这些特性共同决定了它适合成为设备内部的控制核心。'],
+            ['必须连接显示器和键盘才能工作', '错误。单片机常脱离传统人机外设独立运行。'],
+            ['只能执行固定硬件逻辑，不能通过软件改变功能', '错误。软件可编程正是单片机灵活性的来源。'],
+            ['运算能力在所有场景中都高于 DSP 和通用计算机', '错误。单片机擅长低成本测控，但复杂高速信号处理通常是 DSP 的优势。']
+          ], answer: 0,
+          summary: '单片机的价值来自“软硬件结合”：用软件承担大量测控逻辑，并用片内外设减少外围电路。'
+        },
+        {
+          topic: '应用', page: 15,
+          q: '在仪器仪表中加入单片机，通常不会直接带来下列哪项效果？',
+          options: [
+            ['提高自动化和智能化程度', '会带来。单片机可执行测量、计算、判断与控制程序。'],
+            ['简化结构并减小体积', '会带来。片内集成资源可替代部分外部电路。'],
+            ['促进数字化与多功能化', '会带来。这是课件明确列出的发展方向。'],
+            ['保证任何测量在所有条件下都绝对无误差', '正确选项。单片机可提高精度与准确度，但不能消除传感器、环境和系统误差。']
+          ], answer: 3,
+          summary: '工程系统只能改善误差与可靠性，不存在因加入单片机就“绝对无误差”的保证。'
+        },
+        {
+          topic: '发展趋势', page: 19,
+          q: '片内程序存储器普遍采用 Flash 的直接意义是什么？',
+          options: [
+            ['必须增加外部程序存储器', '错误。Flash 片内化通常正是为了减少外扩。'],
+            ['程序只能写入一次，之后不能修改', '错误。Flash 可电擦写和重复编程。'],
+            ['有利于省去外扩程序存储器并简化系统结构', '正确。片内 Flash 同时提升开发与更新的便利性。'],
+            ['使单片机不再需要 RAM', '错误。Flash 保存程序，RAM 仍用于运行时数据。']
+          ], answer: 2,
+          summary: 'Flash 主要承担非易失程序存储；RAM 与它作用不同，不能互相简单替代。'
+        },
+        {
+          topic: '开发方式', page: 22,
+          q: 'ISP 与 IAP 的区别，哪一项表述最合适？',
+          options: [
+            ['ISP 是在系统中写入程序；IAP 强调设备运行环境中的应用程序更新', '正确。二者都提升在线编程能力，IAP 更侧重应用程序自身的在线升级或处理。'],
+            ['ISP 是一种串行通信协议，IAP 是一种并行通信协议', '错误。它们描述编程方式，不等同于某一种固定通信协议。'],
+            ['ISP 只能写 RAM，IAP 只能写 ROM', '错误。课件语境中主要涉及片内 Flash 程序存储器。'],
+            ['两者都要求拆下芯片并放入编程器', '错误。它们的意义恰恰是减少拆卸和专用编程器依赖。']
+          ], answer: 0,
+          summary: '记忆方法：ISP 是“系统内编程”，IAP 是“应用中编程”，后者更强调在线升级能力。'
+        },
+        {
+          topic: 'MCS-51', page: 25,
+          q: '8031 与 8051 的关键差别是什么？',
+          options: [
+            ['8031 没有 CPU，8051 有 CPU', '错误。两者都有 8 位 CPU。'],
+            ['8031 片内无程序存储器，8051 片内有 4KB ROM', '正确。因此 8031 通常需要外扩程序存储器。'],
+            ['8031 有 8KB Flash，8051 没有存储器', '错误。这与课件给出的基本型资源不符。'],
+            ['8031 是 32 位，8051 是 8 位', '错误。二者都是 MCS-51 系列的 8 位单片机。']
+          ], answer: 1,
+          summary: '8031、8051、8751 的典型差别主要落在片内程序存储器：无、ROM、EPROM。'
+        },
+        {
+          topic: 'MCS-51', page: 26,
+          q: '与基本型 8051 相比，增强型 8052 的典型增强不包括哪一项？',
+          options: [
+            ['内部 RAM 增至 256B', '属于增强。课件明确列出这一变化。'],
+            ['程序存储器增至 8KB', '属于增强。8052 的片内程序存储器容量更大。'],
+            ['定时器/计数器增至 3 个', '属于增强。比基本型多一个定时器/计数器。'],
+            ['取消串行口以降低成本', '正确选项。增强型并未取消串行口，课件还指出通信速率有所提高。']
+          ], answer: 3,
+          summary: '8052 的“增强”体现在 RAM、程序存储器、定时器和中断资源增加，而不是删减通信功能。'
+        },
+        {
+          topic: 'AT89S5x', page: 30,
+          q: 'AT89S52 相比 AT89S51，主要增加或扩展了哪些资源？',
+          options: [
+            ['8KB Flash、256B RAM、6 个中断源、3 个定时器', '正确。这是课件列出的 AT89S52 关键增强。'],
+            ['只有 4KB Flash、128B RAM、2 个定时器', '错误。这组资源对应 AT89S51。'],
+            ['取消 Flash，改用外部 ROM', '错误。AT89S 系列的重要特点就是片内 Flash。'],
+            ['由 8 位 CPU 改为 64 位 CPU', '错误。AT89S51/52 都是 8051 内核的 8 位单片机。']
+          ], answer: 0,
+          summary: 'AT89S52 可理解为 AT89S51 的资源增强版，也是课件后续重点采用的代表机型。'
+        },
+        {
+          topic: 'STC 系列', page: 34,
+          q: 'STC 增强型 8051 比经典 8051 更快，一个重要原因是？',
+          options: [
+            ['每个机器周期可缩短为 1 个时钟，而经典 8051 常为 12 个时钟', '正确。更少的时钟周期显著提高了指令执行速度。'],
+            ['完全取消了程序存储器', '错误。STC 机型具有片内 Flash。'],
+            ['所有程序都由模拟电路执行', '错误。它仍然是数字可编程微控制器。'],
+            ['只能工作在更高电压下', '错误。课件反而强调了宽工作电压。']
+          ], answer: 0,
+          summary: '比较性能时不能只看 MHz，还要看完成一条指令需要多少时钟周期。'
+        },
+        {
+          topic: 'C8051F', page: 39,
+          q: 'C8051Fxxx 引入“数字交叉开关”的主要价值是什么？',
+          options: [
+            ['让片内数字外设与外部 I/O 引脚的映射更灵活', '正确。用户可按应用需要组合串口、定时器、中断等数字资源与端口引脚。'],
+            ['把所有数字信号自动转换成模拟信号', '错误。数字交叉开关负责数字资源路由，不是 D/A 转换器。'],
+            ['永久固定每个外设对应的引脚', '错误。它正是为了改变固定对应关系。'],
+            ['只用于提高 Flash 擦写次数', '错误。Flash 寿命与引脚路由不是同一问题。']
+          ], answer: 0,
+          summary: '数字交叉开关像片内的“信号路由器”，提高了引脚复用和硬件配置自由度。'
+        },
+        {
+          topic: 'PIC 系列', page: 45,
+          q: 'PIC 8 位单片机采用 RISC 与哈佛结构，课件强调的主要收益是什么？',
+          options: [
+            ['指令与数据总线分离，有利于提高执行效率和代码密度', '正确。课件提到代码压缩和速度提升。'],
+            ['必须使用更多复杂指令才能完成简单操作', '错误。这与精简指令集的设计方向相反。'],
+            ['程序和数据必须存放在同一条总线上', '错误。哈佛结构的特征正是指令与数据通路分离。'],
+            ['只能用于大型服务器', '错误。PIC 覆盖从小型低成本到较高性能的多种嵌入式应用。']
+          ], answer: 0,
+          summary: 'RISC 强调精简、规则和高效；哈佛结构通过分离指令与数据通路提升并行性。'
+        },
+        {
+          topic: 'AVR 系列', page: 48,
+          q: 'AVR 能够高速执行指令，与下列哪组设计最相关？',
+          options: [
+            ['固定且相对精简的指令格式、单周期指令、预取与流水作业', '正确。这些设计共同缩短取指和执行时间。'],
+            ['大量不定长复杂指令，并取消流水线', '错误。这更接近课件所对比的复杂指令思路。'],
+            ['只使用外部存储器，不设片内 RAM', '错误。AVR 片内集成 Flash 和较大容量 RAM。'],
+            ['依靠机械继电器完成指令执行', '错误。指令由芯片内部数字电路执行。']
+          ], answer: 0,
+          summary: 'AVR 的高速来自 RISC、单周期执行与流水线等体系结构协同，而非单纯提高时钟频率。'
+        },
+        {
+          topic: 'DSP', page: 54,
+          q: '下列任务中，哪一种最能发挥 DSP 的典型优势？',
+          options: [
+            ['高速数字滤波、FFT 和频谱分析', '正确。DSP 的硬件结构和指令专门针对大量数字信号运算优化。'],
+            ['只控制一个 LED 每秒闪烁一次', '不合适。普通单片机即可低成本完成，使用 DSP 往往资源过剩。'],
+            ['保存一份不参与运算的文本文件', '不合适。这不是 DSP 的核心优势场景。'],
+            ['替代所有传感器直接感知物理量', '错误。DSP 处理数字数据，通常仍需传感器和转换电路获取信号。']
+          ], answer: 0,
+          summary: 'DSP 擅长高吞吐、重复性强的数值运算，尤其是向量、滤波、变换和多媒体信号处理。'
+        },
+        {
+          topic: '嵌入式微处理器', page: 57,
+          q: '嵌入式微处理器与单片机相比，最关键的结构差异是什么？',
+          options: [
+            ['嵌入式微处理器更接近单独的 CPU，通常需配合专门电路板和外部资源', '正确。单片机自身通常已构成较完整的小型计算机系统。'],
+            ['嵌入式微处理器一定没有 CPU', '错误。它本身就是以 CPU 为核心。'],
+            ['单片机只能作为存储器使用', '错误。单片机具有计算、I/O 与控制能力。'],
+            ['两者在任何情况下都完全相同', '错误。它们在集成度、外部资源依赖和适用复杂度上存在明显差异。']
+          ], answer: 0,
+          summary: '单片机偏向“一片构成小系统”；嵌入式微处理器偏向“高性能 CPU 加外部系统资源”。'
+        },
+        {
+          topic: '综合辨析', page: 59,
+          q: '关于“嵌入式系统”的理解，哪一项与课件最一致？',
+          options: [
+            ['广义上可包含以单片机、DSP 或嵌入式微处理器为核心的系统', '正确。课件指出广义定义覆盖多类嵌入式处理器。'],
+            ['只有使用桌面 PC 的系统才算嵌入式系统', '错误。嵌入式系统通常服务于特定设备与任务。'],
+            ['嵌入式系统已有唯一且严格统一的定义', '错误。课件明确指出目前尚无严格统一的定义。'],
+            ['只要设备使用电池，就一定是嵌入式系统', '错误。供电方式不是定义嵌入式系统的充分条件。']
+          ], answer: 0,
+          summary: '“嵌入式系统”有广义与较窄的用法，判断时要看语境以及核心处理器和任务属性。'
+        }
+      ];
+
+      const storageKey = 'mcu-chapter-1-progress-v2';
+      let order = questions.map((_, i) => i);
+      let cursor = 0;
+      let wrongBookOpen = false;
+      const states = questions.map(() => ({ selected: null, submitted: false, correct: false }));
+      const mistakes = questions.map(() => ({ attempts: 0, lastSelected: null, mastered: false }));
+
+      const position = root.querySelector('#mcu-position');
+      const completed = root.querySelector('#mcu-completed');
+      const score = root.querySelector('#mcu-score');
+      const wrongCount = root.querySelector('#mcu-wrong-count');
+      const topic = root.querySelector('#mcu-topic');
+      const source = root.querySelector('#mcu-source');
+      const progress = root.querySelector('#mcu-progress');
+      const question = root.querySelector('#mcu-question');
+      const options = root.querySelector('#mcu-options');
+      const summary = root.querySelector('#mcu-summary');
+      const prev = root.querySelector('#mcu-prev');
+      const submit = root.querySelector('#mcu-submit');
+      const next = root.querySelector('#mcu-next');
+      const retry = root.querySelector('#mcu-retry');
+      const wrongBookButton = root.querySelector('#mcu-wrong-book');
+      const wrongList = root.querySelector('#mcu-wrong-list');
+      const clearButton = root.querySelector('#mcu-clear');
+      const savedNote = root.querySelector('#mcu-saved-note');
+      const ask = root.querySelector('#mcu-ask');
+      const askButton = root.querySelector('#mcu-ask-btn');
+      const askFeedback = root.querySelector('#mcu-ask-feedback');
+
+      const letter = i => String.fromCharCode(65 + i);
+      const currentIndex = () => order[cursor];
+
+      function saveProgress() {
+        const payload = {
+          cursor,
+          order,
+          states: states.map(state => ({ selected: state.selected, submitted: state.submitted, correct: state.correct })),
+          mistakes,
+          savedAt: new Date().toISOString()
+        };
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(payload));
+          savedNote.textContent = `已自动保存 · ${new Date(payload.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        } catch (error) {
+          savedNote.textContent = '当前浏览器不允许保存进度';
+        }
+      }
+
+      function loadProgress() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+          if (!saved) return;
+          const validOrder = Array.isArray(saved.order) && saved.order.length === questions.length && saved.order.every(index => Number.isInteger(index) && questions[index]);
+          if (validOrder) order = saved.order;
+          if (Number.isInteger(saved.cursor)) cursor = Math.min(Math.max(saved.cursor, 0), order.length - 1);
+          if (Array.isArray(saved.states)) saved.states.forEach((state, index) => {
+            if (states[index] && state) states[index] = { selected: state.selected ?? null, submitted: Boolean(state.submitted), correct: Boolean(state.correct) };
+          });
+          if (Array.isArray(saved.mistakes)) saved.mistakes.forEach((mistake, index) => {
+            if (mistakes[index] && mistake) mistakes[index] = { attempts: Number(mistake.attempts) || 0, lastSelected: mistake.lastSelected ?? null, mastered: Boolean(mistake.mastered) };
+          });
+          if (saved.savedAt) savedNote.textContent = `已恢复上次进度 · ${new Date(saved.savedAt).toLocaleString()}`;
+        } catch (error) {
+          savedNote.textContent = '已有进度无法读取，将从当前状态开始';
+        }
+      }
+
+      function renderWrongBook() {
+        const entries = mistakes.map((mistake, index) => ({ mistake, index })).filter(entry => entry.mistake.attempts > 0);
+        wrongCount.textContent = String(entries.length);
+        wrongBookButton.textContent = entries.length ? `查看错题本 (${entries.length})` : '查看错题本';
+        wrongList.hidden = !wrongBookOpen;
+        wrongList.replaceChildren();
+        if (!entries.length) {
+          const empty = document.createElement('div');
+          empty.className = 'text-small text-muted';
+          empty.textContent = '还没有错题记录。提交错误答案后，这里会自动归档。';
+          wrongList.appendChild(empty);
+          return;
+        }
+        entries.forEach(({ mistake, index }) => {
+          const item = questions[index];
+          const card = document.createElement('article');
+          card.className = 'wrong-item';
+          const title = document.createElement('strong');
+          title.textContent = `第 ${index + 1} 题 · ${item.topic}`;
+          const prompt = document.createElement('p');
+          prompt.textContent = item.q;
+          const meta = document.createElement('div');
+          meta.className = 'wrong-meta';
+          const attempt = document.createElement('span');
+          attempt.textContent = `作答 ${mistake.lastSelected === null ? '未选择' : letter(mistake.lastSelected)} · 正确答案 ${letter(item.answer)}`;
+          const status = document.createElement('span');
+          status.className = mistake.mastered ? 'mastered' : '';
+          status.textContent = mistake.mastered ? '已掌握' : '待重练';
+          meta.append(attempt, status);
+          card.append(title, prompt, meta);
+          wrongList.appendChild(card);
+        });
+      }
+
+      function render() {
+        const index = currentIndex();
+        const item = questions[index];
+        const state = states[index];
+        const done = states.filter(s => s.submitted).length;
+        const right = states.filter(s => s.correct).length;
+        position.textContent = `${cursor + 1} / ${order.length}`;
+        completed.textContent = String(done);
+        score.textContent = String(right);
+        renderWrongBook();
+        topic.textContent = item.topic;
+        source.textContent = `课件第 ${item.page} 页`;
+        progress.style.width = `${((cursor + 1) / order.length) * 100}%`;
+        question.textContent = item.q;
+        options.replaceChildren();
+
+        item.options.forEach((entry, optionIndex) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn option';
+          button.setAttribute('aria-pressed', String(state.selected === optionIndex));
+          if (state.selected === optionIndex) button.classList.add('is-selected');
+          if (state.submitted && optionIndex === item.answer) button.classList.add('correct');
+          if (state.submitted && state.selected === optionIndex && optionIndex !== item.answer) button.classList.add('wrong');
+          button.innerHTML = `<span class="option-key">${letter(optionIndex)}</span><span><span>${entry[0]}</span>${state.submitted ? `<div class="option-result">${optionIndex === item.answer ? '正确答案：' : '选项解析：'}${entry[1]}</div>` : ''}</span>`;
+          button.disabled = state.submitted;
+          button.addEventListener('click', () => {
+            state.selected = optionIndex;
+            saveProgress();
+            render();
+          });
+          options.appendChild(button);
+        });
+
+        if (state.submitted) {
+          summary.hidden = false;
+          summary.dataset.state = state.correct ? 'correct' : 'wrong';
+          summary.innerHTML = `<strong>${state.correct ? '回答正确' : `回答错误，正确答案是 ${letter(item.answer)}`}</strong><div>${item.summary}</div>`;
+        } else {
+          summary.hidden = true;
+          summary.textContent = '';
+        }
+
+        prev.disabled = cursor === 0;
+        next.disabled = cursor === order.length - 1;
+        submit.disabled = state.submitted || state.selected === null;
+        submit.textContent = state.submitted ? '已提交' : '提交答案';
+        askFeedback.textContent = '';
+      }
+
+      submit.addEventListener('click', () => {
+        const index = currentIndex();
+        const state = states[index];
+        if (state.selected === null || state.submitted) return;
+        state.submitted = true;
+        state.correct = state.selected === questions[index].answer;
+        if (!state.correct) {
+          mistakes[index].attempts += 1;
+          mistakes[index].lastSelected = state.selected;
+          mistakes[index].mastered = false;
+        } else if (mistakes[index].attempts > 0) {
+          mistakes[index].mastered = true;
+        }
+        saveProgress();
+        render();
+      });
+      prev.addEventListener('click', () => { if (cursor > 0) { cursor -= 1; saveProgress(); render(); } });
+      next.addEventListener('click', () => { if (cursor < order.length - 1) { cursor += 1; saveProgress(); render(); } });
+      retry.addEventListener('click', () => {
+        const wrong = states.map((s, i) => ({ s, i })).filter(x => x.s.submitted && !x.s.correct).map(x => x.i);
+        if (!wrong.length) {
+          askFeedback.textContent = '目前没有已提交的错题。';
+          return;
+        }
+        wrong.forEach(i => { states[i] = { selected: null, submitted: false, correct: false }; });
+        order = wrong;
+        cursor = 0;
+        saveProgress();
+        render();
+      });
+      wrongBookButton.addEventListener('click', () => {
+        wrongBookOpen = !wrongBookOpen;
+        renderWrongBook();
+      });
+      clearButton.addEventListener('click', () => {
+        if (!window.confirm('清除第1章的答题进度和错题记录？')) return;
+        localStorage.removeItem(storageKey);
+        order = questions.map((_, i) => i);
+        cursor = 0;
+        states.forEach((state, index) => { states[index] = { selected: null, submitted: false, correct: false }; });
+        mistakes.forEach((mistake, index) => { mistakes[index] = { attempts: 0, lastSelected: null, mastered: false }; });
+        savedNote.textContent = '进度已清除';
+        render();
+      });
+
+      askButton.addEventListener('click', async () => {
+        const text = ask.value.trim();
+        if (!text) {
+          askFeedback.textContent = '请先输入你想追问的内容。';
+          return;
+        }
+        const item = questions[currentIndex()];
+        if (!window.openai || typeof window.openai.sendFollowUpMessage !== 'function') {
+          askFeedback.textContent = '当前环境不支持直接追问，你仍可在对话框中发送这个问题。';
+          return;
+        }
+        askButton.disabled = true;
+        askFeedback.textContent = '正在准备追问…';
+        try {
+          await window.openai.sendFollowUpMessage({
+            title: '追问当前题目',
+            prompt: `请基于《第1章 单片机概述》课件回答。当前题目：${item.q}\n课件依据：第${item.page}页。\n我的追问：${text}\n请用中文讲清楚，必要时逐项辨析并举一个实际例子。`
+          });
+          ask.value = '';
+          askFeedback.textContent = '追问已发送。';
+        } catch (error) {
+          askFeedback.textContent = '发送失败，请稍后再试。';
+        } finally {
+          askButton.disabled = false;
+        }
+      });
+      ask.addEventListener('keydown', event => {
+        if (event.key === 'Enter') askButton.click();
+      });
+
+      loadProgress();
+      render();
+      if (window.lucide) window.lucide.createIcons({ attrs: { width: 16, height: 16 } });
+    })();
+  

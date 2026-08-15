@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>单片机原理及应用 · 第1章题库</title>
+  <style>
+    :root { color-scheme: light; --bg:#f5f7f9; --ink:#17212b; --muted:#607080; --line:#d9e0e6; --paper:#fff; --accent:#176b87; --accent-2:#e7f3f6; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family: system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+    main { width:min(880px, calc(100% - 32px)); margin:0 auto; padding:48px 0 64px; }
+    .eyebrow { color:var(--accent); font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:10px 0 8px; font-size:clamp(28px,5vw,44px); line-height:1.1; letter-spacing:0; }
+    .lede { margin:0; max-width:640px; color:var(--muted); line-height:1.7; }
+    .rule { border:0; border-top:1px solid var(--line); margin:32px 0; }
+    .panel { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:24px; }
+    .panel + .panel { margin-top:14px; }
+    .panel-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    h2 { margin:0; font-size:20px; letter-spacing:0; }
+    .badge { display:inline-flex; align-items:center; min-height:28px; padding:4px 9px; border-radius:999px; background:var(--accent-2); color:var(--accent); font-size:13px; font-weight:650; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    label { display:grid; gap:7px; color:var(--muted); font-size:14px; font-weight:650; }
+    select { width:100%; min-height:44px; border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink); padding:0 12px; font:inherit; }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 17px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--paper); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
+    .btn.primary { border-color:var(--accent); background:var(--accent); color:#fff; }
+    .btn:focus-visible, select:focus-visible { outline:3px solid #a8d5e2; outline-offset:2px; }
+    .meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:18px; }
+    .meta-item { border-top:1px solid var(--line); padding-top:12px; }
+    .meta-item strong { display:block; font-size:24px; }
+    .meta-item span { color:var(--muted); font-size:13px; }
+    .note { color:var(--muted); font-size:14px; line-height:1.7; }
+    .chapter-list { display:grid; gap:10px; }
+    .chapter-link { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:14px; border:1px solid var(--line); border-radius:6px; color:inherit; text-decoration:none; }
+    .chapter-link:hover { border-color:var(--accent); background:var(--accent-2); }
+    .chapter-link strong { display:block; margin-bottom:4px; }
+    .chapter-link span { color:var(--muted); font-size:13px; }
+    @media (max-width:620px) { main { padding-top:32px; } .grid,.meta { grid-template-columns:1fr; } .panel { padding:18px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">单片机原理及应用</div>
+    <h1>互动题库</h1>
+    <p class="lede">前四章题目已整理到同一入口。每章独立保存进度，并提供逐项解析、错题本和重练入口。</p>
+    <hr class="rule">
+
+    <section class="panel" aria-labelledby="chapters-title">
+      <div class="panel-title"><h2 id="chapters-title">选择章节</h2><span class="badge">4 章已准备</span></div>
+      <div class="chapter-list">
+        <a class="chapter-link" href="chapter-1.html"><div><strong>第1章 · 单片机概述</strong><span>18题 · 基本概念、发展历史、应用与处理器家族</span></div><span>进入 →</span></a>
+        <a class="chapter-link" href="chapter-2.html"><div><strong>第2章 · 硬件结构</strong><span>100题 · 引脚、CPU、存储器、I/O、时钟、复位与低功耗</span></div><span>进入 →</span></a>
+        <a class="chapter-link" href="chapter-3.html"><div><strong>第3章 · 指令系统</strong><span>100题 · 寻址方式、指令、标志位、汇编与程序设计</span></div><span>进入 →</span></a>
+        <a class="chapter-link" href="chapter-4.html"><div><strong>第4章 · 中断系统</strong><span>100题 · 中断源、IE/IP、响应、触发方式与扩展</span></div><span>进入 →</span></a>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="features-title">
+      <div class="panel-title"><h2 id="features-title">统一体验</h2><span class="badge">自动保存</span></div>
+      <div class="meta">
+        <div class="meta-item"><strong>318</strong><span>前四章题目</span></div>
+        <div class="meta-item"><strong>4</strong><span>独立进度空间</span></div>
+        <div class="meta-item"><strong>∞</strong><span>错题可反复重练</span></div>
+      </div>
+      <p class="note">答题、提交和翻题都会自动保存到当前浏览器。错题本保留在对应章节内，刷新或重新打开网页后仍可继续。</p>
+    </section>
+  </main>
+</body>
+</html>
